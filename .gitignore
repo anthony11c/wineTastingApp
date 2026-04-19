@@ -1,0 +1,6 @@
+node_modules
+.claude
+.agents
+.env
+skills-lock.json
+.mcp.json
