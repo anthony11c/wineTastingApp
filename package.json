@@ -1,0 +1,19 @@
+{
+  "name": "wine-tasting-app",
+  "version": "1.0.0",
+  "description": "Cossetto Winery — Wine Degustation Booking API",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "dependencies": {
+    "@supabase/ssr": "^0.10.2",
+    "@supabase/supabase-js": "^2.103.3",
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^17.4.2",
+    "express": "^4.22.1",
+    "express-session": "^1.17.3"
+  }
+}

@@ -1,0 +1,1468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Cossetto winery — Wine Degustation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; cursor: default; user-select: none; }
+input, textarea { cursor: text; user-select: text; }
+
+:root {
+  --ink: #1a0d00;
+  --ink-mid: #3d2010;
+  --ink-soft: #7a5540;
+  --ink-faint: #c4a882;
+  --cream: #fdf7f0;
+  --cream-dark: #f5ebe0;
+  --cream-deeper: #ead8c4;
+  --wine: #6b1a1a;
+  --wine-deep: #3d0a0a;
+  --wine-light: #c0504a;
+  --gold: #b8892a;
+  --gold-light: #e8c96a;
+  --green: #2a5c3a;
+  --green-light: #d4eadb;
+  --red-light: #f5dada;
+  --radius: 2px;
+  --radius-lg: 4px;
+  --shadow: 0 1px 3px rgba(26,13,0,0.08), 0 4px 16px rgba(26,13,0,0.06);
+  --shadow-lg: 0 4px 24px rgba(26,13,0,0.14), 0 1px 4px rgba(26,13,0,0.08);
+  font-size: 16px;
+}
+
+body {
+  font-family: 'Jost', sans-serif;
+  background: var(--cream);
+  color: var(--ink);
+  min-height: 100vh;
+  overscroll-behavior: none;
+}
+
+/* ─── Layout ─── */
+.app { max-width: 480px; margin: 0 auto; min-height: 100vh; display: flex; flex-direction: column; background: var(--cream); position: relative; overflow: hidden; }
+
+/* ─── Header ─── */
+.header {
+  background: var(--wine-deep);
+  padding: 48px 24px 24px;
+  position: relative;
+  overflow: hidden;
+}
+.header::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 70% -20%, rgba(184,137,42,0.18) 0%, transparent 60%);
+  pointer-events: none;
+}
+.header-ornament {
+  text-align: center;
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 11px;
+  color: var(--gold);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.header-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 300;
+  font-size: 32px;
+  color: var(--cream);
+  text-align: center;
+  letter-spacing: 0.04em;
+  line-height: 1.1;
+}
+.header-sub {
+  text-align: center;
+  font-size: 11px;
+  font-weight: 300;
+  color: var(--ink-faint);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  margin-top: 6px;
+}
+.header-nav {
+  display: flex;
+  gap: 4px;
+  margin-top: 20px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 3px;
+  padding: 3px;
+}
+.header-nav button {
+  flex: 1;
+  background: none;
+  border: none;
+  color: rgba(253,247,240,0.55);
+  font-family: 'Jost', sans-serif;
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 7px 6px;
+  cursor: pointer;
+  border-radius: 2px;
+  transition: all 0.2s;
+}
+.header-nav button.active {
+  background: rgba(253,247,240,0.12);
+  color: var(--cream);
+}
+
+/* ─── Content ─── */
+.content { flex: 1; padding: 0 16px 80px; overflow-y: auto; }
+
+/* ─── Section ─── */
+.section-label {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin: 24px 0 10px;
+}
+
+/* ─── Cards ─── */
+.card {
+  background: #fff;
+  border: 1px solid var(--cream-deeper);
+  border-radius: var(--radius-lg);
+  padding: 14px 16px;
+  margin-bottom: 8px;
+  box-shadow: var(--shadow);
+}
+
+/* ─── Status badges ─── */
+.badge {
+  display: inline-flex; align-items: center;
+  padding: 3px 9px;
+  border-radius: 1px;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.badge-pending { background: #fdf3e3; color: #8a5a00; border: 1px solid #e8c97a; }
+.badge-confirmed { background: var(--green-light); color: var(--green); border: 1px solid #a8d4b4; }
+.badge-declined { background: var(--red-light); color: #7a1a1a; border: 1px solid #d4aaaa; }
+.badge-new { background: #f0e8f8; color: #4a2878; border: 1px solid #c4a8e8; }
+
+/* ─── Buttons ─── */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  border: none; cursor: pointer;
+  font-family: 'Jost', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 12px 24px;
+  border-radius: var(--radius);
+  transition: all 0.18s;
+}
+.btn-primary {
+  background: var(--wine);
+  color: var(--cream);
+  width: 100%;
+  padding: 15px;
+  font-size: 12px;
+}
+.btn-primary:hover { background: var(--wine-deep); }
+.btn-primary:active { transform: scale(0.98); }
+.btn-primary:disabled { opacity: 0.45; cursor: not-allowed; }
+.btn-secondary {
+  background: none;
+  color: var(--wine);
+  border: 1px solid var(--wine);
+  padding: 9px 14px;
+  font-size: 11px;
+}
+.btn-approve { background: var(--green-light); color: var(--green); flex: 1; padding: 8px; font-size: 11px; border-radius: var(--radius); }
+.btn-decline { background: var(--red-light); color: #7a1a1a; flex: 1; padding: 8px; font-size: 11px; border-radius: var(--radius); }
+.btn-reply { background: var(--cream-dark); color: var(--ink-mid); flex: 1; padding: 8px; font-size: 11px; border-radius: var(--radius); }
+.btn-approve:hover { background: #c4e4cc; }
+.btn-decline:hover { background: #e8c8c8; }
+.btn-reply:hover { background: var(--cream-deeper); }
+
+/* ─── Form elements ─── */
+.form-group { margin-bottom: 14px; }
+label { display: block; font-size: 11px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-soft); margin-bottom: 6px; }
+input[type=text], input[type=email], input[type=tel], input[type=number], textarea, select {
+  width: 100%;
+  background: #fff;
+  border: 1px solid var(--cream-deeper);
+  border-radius: var(--radius);
+  padding: 11px 13px;
+  font-family: 'Jost', sans-serif;
+  font-size: 14px;
+  color: var(--ink);
+  outline: none;
+  transition: border-color 0.18s;
+}
+input:focus, textarea:focus, select:focus { border-color: var(--wine-light); box-shadow: 0 0 0 3px rgba(107,26,26,0.07); }
+textarea { resize: vertical; min-height: 72px; line-height: 1.5; }
+.counter { display: flex; align-items: center; gap: 12px; }
+.counter button {
+  width: 36px; height: 36px;
+  border: 1px solid var(--cream-deeper);
+  background: #fff;
+  border-radius: var(--radius);
+  font-size: 18px;
+  color: var(--ink-mid);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s;
+}
+.counter button:hover { background: var(--cream-dark); border-color: var(--wine-light); }
+.counter-val { font-size: 18px; font-weight: 500; color: var(--ink); min-width: 28px; text-align: center; }
+
+/* ─── Calendar ─── */
+.cal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.cal-month { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 400; color: var(--ink); }
+.cal-nav { background: none; border: 1px solid var(--cream-deeper); border-radius: var(--radius); padding: 6px 10px; cursor: pointer; font-size: 14px; color: var(--ink-soft); transition: all 0.15s; }
+.cal-nav:hover { border-color: var(--wine-light); color: var(--wine); }
+.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
+.cal-dh { height: 28px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 500; letter-spacing: 0.08em; color: var(--ink-soft); text-transform: uppercase; }
+.cal-day-cell {
+  height: 38px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: var(--radius);
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.15s;
+  position: relative;
+  color: var(--ink);
+  border: 1px solid transparent;
+}
+.cal-day-cell:hover:not(.disabled):not(.empty) { background: var(--cream-dark); border-color: var(--cream-deeper); }
+.cal-day-cell.available { color: var(--ink); }
+.cal-day-cell.available::after {
+  content: '';
+  position: absolute;
+  bottom: 4px; left: 50%; transform: translateX(-50%);
+  width: 4px; height: 4px;
+  border-radius: 50%;
+  background: var(--gold);
+}
+.cal-day-cell.selected { background: var(--wine); color: var(--cream); border-color: var(--wine); }
+.cal-day-cell.selected::after { background: var(--cream); }
+.cal-day-cell.today { font-weight: 600; outline: 2px solid var(--wine); outline-offset: -2px; }
+.cal-day-cell.disabled { color: var(--cream-deeper); cursor: default; }
+.cal-day-cell.empty { cursor: default; }
+.cal-day-cell.full { background: #f8e8e8; color: var(--wine); }
+.cal-day-cell.partial { background: #fdf3e3; color: #8a5a00; }
+.cal-day-cell.full.selected, .cal-day-cell.partial.selected { background: var(--wine); color: var(--cream); }
+
+/* ─── Time slots ─── */
+.time-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.time-slot {
+  padding: 10px 6px;
+  text-align: center;
+  border: 1px solid var(--cream-deeper);
+  border-radius: var(--radius);
+  background: #fff;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-size: 13px;
+  color: var(--ink-mid);
+}
+.time-slot:hover:not(.booked) { border-color: var(--wine-light); color: var(--wine); }
+.time-slot.selected { background: var(--wine); color: var(--cream); border-color: var(--wine); }
+.time-slot.booked { background: var(--cream-dark); color: var(--ink-faint); cursor: not-allowed; text-decoration: line-through; }
+
+/* ─── Packages ─── */
+.pkg-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.pkg-card {
+  border: 1px solid var(--cream-deeper);
+  border-radius: var(--radius-lg);
+  padding: 14px 12px;
+  background: #fff;
+  cursor: pointer;
+  transition: all 0.18s;
+  position: relative;
+}
+.pkg-card:hover { border-color: var(--wine-light); }
+.pkg-card.selected { border-color: var(--wine); background: #fdf8f6; }
+.pkg-card.selected::before {
+  content: '✓';
+  position: absolute; top: 8px; right: 10px;
+  font-size: 11px; color: var(--wine);
+}
+.pkg-name { font-family: 'Cormorant Garamond', serif; font-size: 17px; font-weight: 400; color: var(--ink); margin-bottom: 2px; }
+.pkg-desc { font-size: 10px; color: var(--ink-soft); line-height: 1.4; margin-bottom: 8px; }
+.pkg-price { font-size: 16px; font-weight: 500; color: var(--wine); }
+.pkg-price span { font-size: 10px; font-weight: 300; color: var(--ink-soft); }
+
+/* ─── Steps indicator ─── */
+.steps { display: flex; align-items: center; gap: 0; margin: 20px 0 4px; }
+.step { display: flex; align-items: center; flex: 1; }
+.step-dot { width: 24px; height: 24px; border-radius: 50%; border: 1px solid var(--cream-deeper); background: #fff; display: flex; align-items: center; justify-content: center; font-size: 11px; color: var(--ink-soft); flex-shrink: 0; transition: all 0.2s; }
+.step-dot.done { background: var(--wine); border-color: var(--wine); color: #fff; font-size: 10px; }
+.step-dot.active { background: var(--wine-deep); border-color: var(--wine-deep); color: var(--cream); font-weight: 500; }
+.step-line { flex: 1; height: 1px; background: var(--cream-deeper); }
+.step-line.done { background: var(--wine); }
+
+/* ─── Tabs (bottom) ─── */
+.tab-bar {
+  position: fixed;
+  bottom: 0; left: 50%; transform: translateX(-50%);
+  width: 100%; max-width: 480px;
+  background: rgba(253,247,240,0.95);
+  backdrop-filter: blur(8px);
+  border-top: 1px solid var(--cream-deeper);
+  display: flex;
+  z-index: 100;
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+.tab-item {
+  flex: 1;
+  display: flex; flex-direction: column; align-items: center;
+  padding: 10px 4px 12px;
+  cursor: pointer;
+  transition: all 0.15s;
+  background: none; border: none;
+}
+.tab-icon { font-size: 18px; margin-bottom: 3px; opacity: 0.4; transition: all 0.15s; }
+.tab-label { font-size: 9px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-soft); transition: all 0.15s; }
+.tab-item.active .tab-icon { opacity: 1; }
+.tab-item.active .tab-label { color: var(--wine); }
+
+/* ─── Booking card ─── */
+.booking-row { display: flex; justify-content: space-between; align-items: flex-start; }
+.booking-name { font-family: 'Cormorant Garamond', serif; font-size: 17px; font-weight: 500; color: var(--ink); }
+.booking-meta { font-size: 12px; color: var(--ink-soft); margin-top: 3px; }
+.action-row { display: flex; gap: 6px; margin-top: 10px; }
+
+/* ─── Admin login ─── */
+.login-wrap {
+  flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 40px 32px;
+}
+.login-ornament { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 48px; color: var(--wine); margin-bottom: 16px; text-align: center; }
+.login-title { font-family: 'Cormorant Garamond', serif; font-size: 26px; font-weight: 300; color: var(--ink); text-align: center; margin-bottom: 6px; }
+.login-sub { font-size: 12px; color: var(--ink-soft); text-align: center; margin-bottom: 32px; letter-spacing: 0.06em; }
+.login-form { width: 100%; max-width: 320px; }
+.login-hint { font-size: 11px; color: var(--ink-faint); text-align: center; margin-top: 14px; }
+
+/* ─── Toast ─── */
+.toast {
+  position: fixed; bottom: 72px; left: 50%; transform: translateX(-50%) translateY(150px);
+  background: var(--wine-deep); color: var(--cream);
+  padding: 12px 20px; border-radius: 3px;
+  font-size: 13px; font-weight: 400;
+  box-shadow: var(--shadow-lg);
+  z-index: 999;
+  transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  white-space: nowrap;
+  pointer-events: none;
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+
+/* ─── Divider ─── */
+.divider { height: 1px; background: var(--cream-deeper); margin: 16px 0; }
+
+/* ─── Confirmation ─── */
+.confirm-icon { text-align: center; font-size: 56px; margin: 32px 0 16px; }
+.confirm-title { font-family: 'Cormorant Garamond', serif; font-size: 26px; font-weight: 300; color: var(--ink); text-align: center; margin-bottom: 8px; }
+.confirm-msg { font-size: 13px; color: var(--ink-soft); text-align: center; line-height: 1.6; margin-bottom: 28px; }
+.confirm-detail { background: #fff; border: 1px solid var(--cream-deeper); border-radius: var(--radius-lg); padding: 16px; margin-bottom: 24px; }
+.cd-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--cream-dark); }
+.cd-row:last-child { border-bottom: none; }
+.cd-label { font-size: 11px; color: var(--ink-soft); font-weight: 400; }
+.cd-value { font-size: 13px; color: var(--ink); font-weight: 500; }
+
+/* ─── Reply modal ─── */
+.overlay {
+  position: fixed; inset: 0;
+  background: rgba(26,13,0,0.5);
+  z-index: 200;
+  display: flex; align-items: flex-end;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.25s;
+}
+.overlay.open { opacity: 1; pointer-events: all; }
+.modal {
+  background: var(--cream);
+  border-radius: 8px 8px 0 0;
+  padding: 24px 20px 40px;
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  transform: translateY(100%);
+  transition: transform 0.3s cubic-bezier(0.34,1.2,0.64,1);
+}
+.overlay.open .modal { transform: translateY(0); }
+.modal-title { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 400; color: var(--ink); margin-bottom: 4px; }
+.modal-sub { font-size: 12px; color: var(--ink-soft); margin-bottom: 18px; }
+.modal-handle { width: 40px; height: 4px; background: var(--cream-deeper); border-radius: 2px; margin: 0 auto 18px; }
+
+/* ─── Scrollbar ─── */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--cream-deeper); border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<div class="app" id="app"></div>
+<div class="toast" id="toast"></div>
+<div class="overlay" id="overlay">
+  <div class="modal" id="modal">
+    <div class="modal-handle"></div>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script>
+// ─── Supabase client ────────────────────────────────────────────
+const sb = supabase.createClient(
+  'https://ofwesqkqcyipgihbdkip.supabase.co',
+  'sb_publishable_4oEQ2imGO549qMhxH2dNwg_Cy993XpO'
+);
+
+// ─── State ──────────────────────────────────────────────────────
+const state = {
+  view: 'home',
+  adminLoggedIn: false,
+  adminReservations: [],
+  booking: { date: null, time: null, package: null, name: '', email: '', phone: '', guests: 2, notes: '' },
+  calMonth: new Date(),
+  adminCalMonth: new Date(),
+  adminSelectedDay: null,
+  adminFilter: 'all',
+  adminPendingTab: 'today',
+  slotsData: {},        // { 'YYYY-MM-DD': ['HH:MM', ...] }
+  // Guest auth (Supabase OTP)
+  guestOtpSent: false,
+  guestOtpEmail: '',
+  guestSession: null,
+  myBookings: [],
+};
+
+let packages = [];
+
+// ─── Utilities ───────────────────────────────────────────────────
+function fmtDate(d) {
+  if (!d) return '';
+  const [y, m, day] = String(d).split('-');
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const dt = new Date(+y, +m - 1, +day);
+  return `${days[dt.getDay()]} ${+day} ${months[+m - 1]} ${y}`;
+}
+function monthName(d) {
+  return d.toLocaleString('default', { month: 'long', year: 'numeric' });
+}
+function dateKey(y, m, d) {
+  return `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+}
+function getBookingsForDate(dt) {
+  return state.adminReservations.filter(r => r.date === dt && r.status !== 'declined');
+}
+let _toastTimer = null;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => {
+    t.classList.remove('show');
+    setTimeout(() => { t.textContent = ''; }, 350);
+  }, 5000);
+}
+function openModal(bodyHtml) {
+  document.getElementById('modal-body').innerHTML = bodyHtml;
+  document.getElementById('overlay').classList.add('open');
+}
+function closeModal() {
+  document.getElementById('overlay').classList.remove('open');
+}
+function statusBadge(s) {
+  if (s === 'pending') return `<span class="badge badge-pending">Pending</span>`;
+  if (s === 'confirmed') return `<span class="badge badge-confirmed">Confirmed</span>`;
+  if (s === 'declined') return `<span class="badge badge-declined">Declined</span>`;
+  return `<span class="badge badge-new">New</span>`;
+}
+
+// ─── Supabase data helpers ───────────────────────────────────────
+async function fetchSlotsForMonth(year, month) {
+  const m = String(month + 1).padStart(2, '0');
+  const lastDay = new Date(year, month + 1, 0).getDate();
+  const from = `${year}-${m}-01`;
+  const to = `${year}-${m}-${String(lastDay).padStart(2, '0')}`;
+  const { data } = await sb.from('available_slots').select('date, slots').gte('date', from).lte('date', to);
+  state.slotsData = {};
+  for (const row of (data || [])) {
+    // date comes back as 'YYYY-MM-DD'
+    state.slotsData[row.date] = row.slots;
+  }
+  render();
+}
+
+async function fetchAdminReservations() {
+  try {
+    const res = await fetch('/api/admin/reservations', { credentials: 'include' });
+    if (res.ok) {
+      const data = await res.json();
+      state.adminReservations = data.sort((a, b) => {
+        if (a.date !== b.date) return a.date.localeCompare(b.date);
+        return a.time.localeCompare(b.time);
+      });
+    }
+  } catch (_) {}
+  render();
+}
+
+async function fetchMyBookings() {
+  const { data, error } = await sb.from('reservations').select('*').order('created_at', { ascending: false });
+  if (!error) {
+    state.myBookings = data || [];
+    render();
+  }
+}
+
+// ─── Render ──────────────────────────────────────────────────────
+function render() {
+  const app = document.getElementById('app');
+  const v = state.view;
+  if (v === 'home')            app.innerHTML = renderHome();
+  else if (v === 'book-date')  app.innerHTML = renderBookDate();
+  else if (v === 'book-details') app.innerHTML = renderBookDetails();
+  else if (v === 'confirm')    app.innerHTML = renderConfirm();
+  else if (v === 'my-bookings') app.innerHTML = renderMyBookings();
+  else if (v === 'admin-login') app.innerHTML = renderAdminLogin();
+  else if (v === 'admin-overview') app.innerHTML = renderAdminOverview();
+  else if (v === 'admin-calendar') app.innerHTML = renderAdminCalendar();
+  else if (v === 'admin-all')  app.innerHTML = renderAdminAll();
+  attachEvents();
+}
+
+// ─── Headers ─────────────────────────────────────────────────────
+function guestHeader(active) {
+  const tabs = [
+    { key: 'home', label: 'Home', icon: '⌂' },
+    { key: 'book-date', label: 'Book', icon: '◎' },
+    { key: 'my-bookings', label: 'My bookings', icon: '◈' },
+  ];
+  return `
+  <div class="header">
+    <div class="header-ornament">★ &nbsp; Bookings ★</div>
+    <div class="header-title">Cossetto winery</div>
+    <div class="header-sub">Wine Tasting · Roškići 10, Kaštelir</div>
+    <nav class="header-nav">
+      ${tabs.map(t => `<button data-nav="${t.key}" class="${active === t.key ? 'active' : ''}">${t.label}</button>`).join('')}
+    </nav>
+  </div>`;
+}
+
+function adminHeader(active) {
+  const tabs = [
+    { key: 'admin-overview', label: 'Overview' },
+    { key: 'admin-calendar', label: 'Calendar' },
+    { key: 'admin-all', label: 'All bookings' },
+  ];
+  return `
+  <div class="header">
+    <div class="header-ornament">Admin Panel</div>
+    <div class="header-title">Cossetto winery</div>
+    <div class="header-sub">Reservation Management</div>
+    <nav class="header-nav">
+      ${tabs.map(t => `<button data-nav="${t.key}" class="${active === t.key ? 'active' : ''}">${t.label}</button>`).join('')}
+    </nav>
+  </div>`;
+}
+
+// ─── Home ─────────────────────────────────────────────────────────
+function renderHome() {
+  const upcoming = state.guestSession
+    ? state.myBookings.filter(r => r.status !== 'declined').slice(0, 2)
+    : [];
+
+  return `
+  ${guestHeader('home')}
+  <div class="content">
+    <div class="card" style="background:linear-gradient(135deg,var(--wine-deep) 0%,var(--wine) 100%);border:none;padding:20px;margin-top:20px;cursor:pointer;" data-action="go-book">
+      <div style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:13px;color:var(--gold-light);margin-bottom:6px;">Reserve a table</div>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:22px;color:var(--cream);margin-bottom:12px;">Book a wine tasting</div>
+      <div style="font-size:11px;color:rgba(253,247,240,0.65);line-height:1.6;margin-bottom:16px;">Choose from our curated degustation packages — guided by our sommelier in the heart of the estate.</div>
+      <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(253,247,240,0.15);border:1px solid rgba(253,247,240,0.25);padding:9px 16px;border-radius:2px;">
+        <span style="font-size:11px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:var(--cream);">Book now</span>
+        <span style="color:var(--gold-light);">→</span>
+      </div>
+    </div>
+
+    ${state.guestSession ? `
+    <div class="section-label">My upcoming tastings</div>
+    ${upcoming.length === 0 ? `<p style="font-size:13px;color:var(--ink-soft);padding:8px 0;">No upcoming reservations.</p>` :
+      upcoming.map(r => `
+      <div class="card">
+        <div class="booking-row">
+          <div>
+            <div class="booking-name">${r.pkg} tasting</div>
+            <div class="booking-meta">${fmtDate(r.date)} · ${r.time} · ${r.guests} guests</div>
+          </div>
+          ${statusBadge(r.status)}
+        </div>
+      </div>`).join('')}
+    ` : `
+    <div class="section-label">Your bookings</div>
+    <div style="padding:12px 0;font-size:13px;color:var(--ink-soft);">
+      Already booked? <a href="#" data-action="go-my-bookings" style="color:var(--wine);text-decoration:none;">Check your reservation status →</a>
+    </div>`}
+
+    <div class="section-label">Our packages</div>
+    ${packages.map(p => `
+    <div class="card" style="display:flex;justify-content:space-between;align-items:center;">
+      <div>
+        <div style="font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:400;margin-bottom:3px;">${p.name}</div>
+        <div style="font-size:11px;color:var(--ink-soft);">${p.description}</div>
+      </div>
+      ${p.price != null ? `<div style="font-size:16px;font-weight:500;color:var(--wine);">€${p.price}<span style="font-size:10px;color:var(--ink-soft);font-weight:300;">/p</span></div>` : ''}
+    </div>`).join('')}
+
+    <div style="margin-top:24px;padding:16px;background:#fff;border:1px solid var(--cream-deeper);border-radius:var(--radius-lg);text-align:center;">
+      <div style="font-size:11px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:6px;">Opening hours</div>
+      <div style="font-size:13px;color:var(--ink-mid);">Mon – Sat · 12:00 – 19:00</div>
+      <div style="font-size:12px;color:var(--ink-soft);margin-top:4px;">Last tasting at 17:30</div>
+    </div>
+
+    <div style="margin-top:12px;text-align:center;padding:12px 0;">
+      <button class="btn btn-secondary" data-action="admin-entry" style="font-size:10px;">Staff login →</button>
+    </div>
+  </div>`;
+}
+
+// ─── Book: Date ───────────────────────────────────────────────────
+function renderBookDate() {
+  const m = state.calMonth;
+  const year = m.getFullYear();
+  const month = m.getMonth();
+  const firstDay = new Date(year, month, 1).getDay();
+  const offset = (firstDay + 6) % 7;
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+  const _today = new Date();
+  const _todayKey = dateKey(_today.getFullYear(), _today.getMonth(), _today.getDate());
+
+  let cells = '';
+  for (let i = 0; i < offset; i++) cells += `<div class="cal-day-cell empty"></div>`;
+  for (let d = 1; d <= daysInMonth; d++) {
+    const key = dateKey(year, month, d);
+    const hasSlots = !!state.slotsData[key] && state.slotsData[key].length > 0;
+    const isSel = state.booking.date === key;
+    const isPast = new Date(year, month, d) < new Date(_today.getFullYear(), _today.getMonth(), _today.getDate());
+    const isToday = key === _todayKey;
+    let cls = 'cal-day-cell';
+    if (isPast || !hasSlots) cls += ' disabled';
+    else if (isSel) cls += ' available selected';
+    else cls += ' available';
+    if (isToday) cls += ' today';
+    cells += `<div class="${cls}" data-date="${key}">${d}</div>`;
+  }
+
+  const _now = new Date();
+  const _nowKey = dateKey(_now.getFullYear(), _now.getMonth(), _now.getDate());
+  const _nowHHMM = `${String(_now.getHours()).padStart(2,'0')}:${String(_now.getMinutes()).padStart(2,'0')}`;
+  let slots = state.booking.date ? (state.slotsData[state.booking.date] || []) : [];
+  if (state.booking.date === _nowKey) slots = slots.filter(t => t > _nowHHMM);
+  const allSlots = ['12:00','12:30','13:00','13:30','14:00','14:30','15:00','15:30','16:00','16:30','17:00','17:30','18:00'];
+
+  return `
+  ${guestHeader('book-date')}
+  <div class="content">
+    <div class="steps">
+      <div class="step-dot active">1</div>
+      <div class="step-line"></div>
+      <div class="step-dot">2</div>
+      <div class="step-line"></div>
+      <div class="step-dot">3</div>
+    </div>
+    <div class="section-label">Select a date</div>
+    <div class="card">
+      <div class="cal-header">
+        <button class="cal-nav" data-action="cal-prev" ${year === new Date().getFullYear() && month === new Date().getMonth() ? 'disabled style="opacity:0.3;cursor:default;"' : ''}>‹</button>
+        <div class="cal-month">${monthName(m)}</div>
+        <button class="cal-nav" data-action="cal-next">›</button>
+      </div>
+      <div class="cal-grid">
+        ${['Mo','Tu','We','Th','Fr','Sa','Su'].map(d => `<div class="cal-dh">${d}</div>`).join('')}
+        ${cells}
+      </div>
+      <div style="display:flex;gap:12px;margin-top:12px;">
+        <div style="display:flex;align-items:center;gap:5px;font-size:10px;color:var(--ink-soft);">
+          <span style="width:8px;height:8px;border-radius:50%;background:var(--gold);display:inline-block;"></span> Available
+        </div>
+        <div style="display:flex;align-items:center;gap:5px;font-size:10px;color:var(--ink-soft);">
+          <span style="width:8px;height:8px;border-radius:50%;background:var(--cream-deeper);display:inline-block;"></span> Unavailable
+        </div>
+      </div>
+    </div>
+
+    ${state.booking.date ? `
+    <div class="section-label">Available times · ${fmtDate(state.booking.date)}</div>
+    <div class="time-grid">
+      ${allSlots.map(t => {
+        const avail = slots.includes(t);
+        const sel = state.booking.time === t;
+        return `<div class="time-slot ${!avail ? 'booked' : sel ? 'selected' : ''}" data-time="${t}">${t}</div>`;
+      }).join('')}
+    </div>` : `<div style="padding:16px 0;font-size:13px;color:var(--ink-soft);">Select a date to see available times.</div>`}
+
+    <button class="btn btn-primary" data-action="next-step" style="margin-top:20px;"
+      ${!state.booking.date || !state.booking.time ? 'disabled' : ''}>
+      Continue →
+    </button>
+  </div>`;
+}
+
+// ─── Book: Details ────────────────────────────────────────────────
+function renderBookDetails() {
+  return `
+  ${guestHeader('book-date')}
+  <div class="content">
+    <div class="steps">
+      <div class="step-dot done">✓</div>
+      <div class="step-line done"></div>
+      <div class="step-dot active">2</div>
+      <div class="step-line"></div>
+      <div class="step-dot">3</div>
+    </div>
+
+    <div class="section-label">Choose package</div>
+    <div class="pkg-grid">
+      ${packages.map(p => `
+      <div class="pkg-card ${state.booking.package === p.id ? 'selected' : ''}" data-pkg="${p.id}">
+        <div class="pkg-name">${p.name}</div>
+        <div class="pkg-desc">${p.description}</div>
+        ${p.price != null ? `<div class="pkg-price">€${p.price} <span>/ person</span></div>` : ''}
+      </div>`).join('')}
+    </div>
+
+    <div class="section-label">Your details</div>
+    <div class="card">
+      <div class="form-group">
+        <label>Full name</label>
+        <input type="text" id="f-name" value="${state.booking.name}" placeholder="Enter your full name">
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="f-email" value="${state.booking.email}" placeholder="Enter your email address">
+      </div>
+      <div class="form-group">
+        <label>Phone (optional)</label>
+        <input type="tel" id="f-phone" value="${state.booking.phone}" placeholder="+385 91 000 0000">
+      </div>
+      <div class="form-group">
+        <label>Number of guests</label>
+        <div class="counter">
+          <button data-action="guests-minus">−</button>
+          <div class="counter-val" id="guests-val">${state.booking.guests}</div>
+          <button data-action="guests-plus">+</button>
+          <span style="font-size:12px;color:var(--ink-soft);"><b>(max 10)</b></span>
+        </div>
+        <span style="font-size:12px;color:var(--ink-soft);">Parties larger than 10 contact us <b>info@cossetto.com.hr</b></span>
+      </div>
+      <div class="form-group" style="margin-bottom:0">
+        <label>Special requests</label>
+        <textarea id="f-notes" placeholder="Dietary requirements, allergies, occasion...">${state.booking.notes}</textarea>
+      </div>
+    </div>
+
+    <div style="background:#fff;border:1px solid var(--cream-deeper);border-radius:var(--radius-lg);padding:14px 16px;margin-top:4px;margin-bottom:4px;">
+      <div style="font-size:11px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:8px;">Summary</div>
+      <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;">
+        <span style="color:var(--ink-soft);">Date</span>
+        <span>${fmtDate(state.booking.date)} · ${state.booking.time}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:13px;">
+        <span style="color:var(--ink-soft);">Package</span>
+        <span>${state.booking.package ? packages.find(p => p.id === state.booking.package)?.name || '—' : '—'}</span>
+      </div>
+    </div>
+
+    <button class="btn btn-primary" data-action="submit-booking" style="margin-top:16px;">
+      Send reservation request
+    </button>
+    <button class="btn btn-secondary" data-action="back-step" style="margin-top:8px;width:100%;justify-content:center;">
+      ← Back
+    </button>
+  </div>`;
+}
+
+// ─── Confirm ──────────────────────────────────────────────────────
+function renderConfirm() {
+  const b = state.booking;
+  const pkg = packages.find(p => p.id === b.package);
+  return `
+  ${guestHeader('home')}
+  <div class="content">
+    <div class="steps">
+      <div class="step-dot done">✓</div>
+      <div class="step-line done"></div>
+      <div class="step-dot done">✓</div>
+      <div class="step-line done"></div>
+      <div class="step-dot done">✓</div>
+    </div>
+    <div class="confirm-icon">🍷</div>
+    <div class="confirm-title">Request sent</div>
+    <div class="confirm-msg">Thank you, ${b.name.split(' ')[0] || 'Guest'}. Your reservation request has been received. We'll confirm within 24 hours.</div>
+    <div class="confirm-detail">
+      <div class="cd-row"><span class="cd-label">Date</span><span class="cd-value">${fmtDate(b.date)}</span></div>
+      <div class="cd-row"><span class="cd-label">Time</span><span class="cd-value">${b.time}</span></div>
+      <div class="cd-row"><span class="cd-label">Package</span><span class="cd-value">${pkg ? pkg.name : '—'}</span></div>
+      <div class="cd-row"><span class="cd-label">Guests</span><span class="cd-value">${b.guests} persons</span></div>
+      ${pkg?.price != null ? `<div class="cd-row"><span class="cd-label">Total estimate</span><span class="cd-value" style="color:var(--wine);">€${pkg.price * b.guests}</span></div>` : ''}
+    </div>
+    <div style="padding:12px 14px;background:var(--green-light);border-radius:var(--radius-lg);margin-bottom:20px;font-size:12px;color:var(--green);line-height:1.5;">
+      To track your reservation status, go to <strong>My Bookings</strong> and enter the email address you used to book.
+    </div>
+    <button class="btn btn-primary" data-action="go-home">Back to home</button>
+  </div>`;
+}
+
+// ─── My Bookings (OTP auth) ───────────────────────────────────────
+function renderMyBookings() {
+  if (state.guestSession) {
+    return renderMyBookingsList();
+  }
+  if (state.guestOtpSent) {
+    return renderMyBookingsOtpEntry();
+  }
+  return renderMyBookingsEmailEntry();
+}
+
+function renderMyBookingsEmailEntry() {
+  return `
+  ${guestHeader('my-bookings')}
+  <div class="content">
+    <div style="text-align:center;padding:32px 0 16px;">
+      <div style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:44px;color:var(--wine);margin-bottom:12px;">◈</div>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:300;color:var(--ink);margin-bottom:8px;">My reservations</div>
+      <div style="font-size:12px;color:var(--ink-soft);line-height:1.6;">Enter your email to receive a verification code<br>and view your booking status.</div>
+    </div>
+    <div class="card">
+      <div class="form-group" style="margin-bottom:12px;">
+        <label>Email address</label>
+        <input type="email" id="otp-email" value="${state.guestOtpEmail}" placeholder="The email you used to book">
+      </div>
+      <button class="btn btn-primary" data-action="send-otp">Send verification code</button>
+    </div>
+  </div>`;
+}
+
+function renderMyBookingsOtpEntry() {
+  return `
+  ${guestHeader('my-bookings')}
+  <div class="content">
+    <div style="text-align:center;padding:32px 0 16px;">
+      <div style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:44px;color:var(--wine);margin-bottom:12px;">✉</div>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:300;color:var(--ink);margin-bottom:8px;">Check your email</div>
+      <div style="font-size:12px;color:var(--ink-soft);line-height:1.7;">We sent a link to<br><strong style="color:var(--ink);">${state.guestOtpEmail}</strong><br>Click it to view your reservations.</div>
+    </div>
+    <div class="card" style="text-align:center;padding:20px 16px;">
+      <div style="font-size:11px;color:var(--ink-soft);margin-bottom:14px;">The link expires in 1 hour.</div>
+      <button class="btn btn-secondary" data-action="resend-otp" style="font-size:10px;">← Use a different email</button>
+    </div>
+  </div>`;
+}
+
+function renderMyBookingsList() {
+  const my = state.myBookings;
+  return `
+  ${guestHeader('my-bookings')}
+  <div class="content">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:16px;margin-bottom:10px;">
+      <div class="section-label" style="margin:0;">Your reservations</div>
+      <button class="btn btn-secondary" data-action="guest-signout" style="font-size:10px;padding:6px 12px;">Sign out</button>
+    </div>
+    ${my.length === 0 ? `
+    <div style="padding:32px 0;text-align:center;">
+      <div style="font-size:13px;color:var(--ink-soft);margin-bottom:12px;">No reservations found for this email.</div>
+      <a href="#" data-action="go-book" style="color:var(--wine);font-size:13px;">Book a tasting →</a>
+    </div>` :
+      my.map(r => {
+        const replies = r.replies || [];
+        return `
+        <div class="card">
+          <div class="booking-row">
+            <div>
+              <div class="booking-name">${r.pkg} tasting</div>
+              <div class="booking-meta">${fmtDate(r.date)} · ${r.time}</div>
+              <div class="booking-meta">${r.guests} guests${r.notes ? ' · ' + r.notes : ''}</div>
+            </div>
+            ${statusBadge(r.status)}
+          </div>
+          ${r.status === 'confirmed' ? `<div style="margin-top:10px;padding:8px 10px;background:var(--green-light);border-radius:2px;font-size:11px;color:var(--green);">Your tasting is confirmed. See you soon!</div>` : ''}
+          ${r.status === 'declined' ? `<div style="margin-top:10px;padding:8px 10px;background:var(--red-light);border-radius:2px;font-size:11px;color:#7a1a1a;">Unfortunately this slot is not available. Please book another date.</div>` : ''}
+          ${replies.length > 0 ? `
+          <div style="margin-top:10px;border-top:1px solid var(--cream-deeper);padding-top:10px;">
+            <div style="font-size:10px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:6px;">Message from the winery</div>
+            ${replies.map(rep => `
+            <div style="background:var(--cream-dark);border-radius:var(--radius);padding:8px 10px;margin-bottom:6px;">
+              <div style="font-size:12px;color:var(--ink);line-height:1.5;">${rep.message}</div>
+              <div style="font-size:10px;color:var(--ink-soft);margin-top:4px;">${rep.sentAt ? new Date(rep.sentAt).toLocaleString('en-GB', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' }) : ''}</div>
+            </div>`).join('')}
+          </div>` : ''}
+        </div>`;
+      }).join('')}
+  </div>`;
+}
+
+// ─── Admin Login ──────────────────────────────────────────────────
+function renderAdminLogin() {
+  return `
+  <div class="header" style="padding:32px 24px 24px;">
+    <div class="header-ornament">Staff Access</div>
+    <div class="header-title">Cossetto winery</div>
+    <div class="header-sub">Administration</div>
+  </div>
+  <div class="login-wrap">
+    <div class="login-ornament">⬡</div>
+    <div class="login-title">Admin login</div>
+    <div class="login-sub">Reserved for estate staff</div>
+    <div class="login-form">
+      <div class="form-group">
+        <label>Username</label>
+        <input type="text" id="admin-user" placeholder="admin" autocomplete="username">
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="admin-pass" placeholder="Enter password" autocomplete="current-password">
+      </div>
+      <button class="btn btn-primary" data-action="do-login" style="margin-top:4px;">Sign in</button>
+      <button class="btn btn-secondary" data-action="go-home" style="margin-top:12px;width:100%;justify-content:center;font-size:10px;">← Back to guest view</button>
+    </div>
+  </div>`;
+}
+
+// ─── Admin Overview ───────────────────────────────────────────────
+function renderAdminOverview() {
+  const all = state.adminReservations;
+  const pending = all.filter(r => r.status === 'pending');
+
+  const _now = new Date();
+  const todayKey = dateKey(_now.getFullYear(), _now.getMonth(), _now.getDate());
+  const _tom = new Date(_now.getFullYear(), _now.getMonth(), _now.getDate() + 1);
+  const tomorrowKey = dateKey(_tom.getFullYear(), _tom.getMonth(), _tom.getDate());
+
+  const confirmed = all.filter(r => r.status === 'confirmed');
+  const tastingsToday = all.filter(r => r.date === todayKey && r.status === 'confirmed');
+  const tastingsTomorrow = all.filter(r => r.date === tomorrowKey && r.status === 'confirmed');
+  const guestsToday = tastingsToday.reduce((a, r) => a + r.guests, 0);
+
+  return `
+  ${adminHeader('admin-overview')}
+  <div class="content">
+    <div class="section-label" style="margin-top:20px;">At a glance</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:4px;">
+      <div style="background:#fff;border:1px solid var(--cream-deeper);border-radius:var(--radius-lg);padding:14px;">
+        <div style="font-size:28px;font-weight:500;color:var(--wine);">${tastingsToday.length}</div>
+        <div style="font-size:11px;color:var(--ink-soft);margin-top:2px;">Tastings today</div>
+      </div>
+      <div style="background:#fff;border:1px solid var(--cream-deeper);border-radius:var(--radius-lg);padding:14px;">
+        <div style="font-size:28px;font-weight:500;color:var(--ink);">${tastingsTomorrow.length}</div>
+        <div style="font-size:11px;color:var(--ink-soft);margin-top:2px;">Tastings tomorrow</div>
+      </div>
+      <div style="background:#fff;border:1px solid var(--cream-deeper);border-radius:var(--radius-lg);padding:14px;">
+        <div style="font-size:28px;font-weight:500;color:var(--gold);">${guestsToday}</div>
+        <div style="font-size:11px;color:var(--ink-soft);margin-top:2px;">Total guests today</div>
+      </div>
+      <div style="background:#fff;border:1px solid var(--cream-deeper);border-radius:var(--radius-lg);padding:14px;">
+        <div style="font-size:28px;font-weight:500;color:var(--green);">${pending.length}</div>
+        <div style="font-size:11px;color:var(--ink-soft);margin-top:2px;">Pending</div>
+      </div>
+    </div>
+
+    <div class="section-label">Pending approval (${pending.length})</div>
+    ${pending.length === 0 ? `<p style="font-size:13px;color:var(--ink-soft);padding:12px 0;">All reservations reviewed.</p>` : (() => {
+      const pendingToday    = pending.filter(r => r.date === todayKey);
+      const pendingTomorrow = pending.filter(r => r.date === tomorrowKey);
+      const pendingOther    = pending.filter(r => r.date !== todayKey && r.date !== tomorrowKey);
+      const tab = state.adminPendingTab;
+      const active = 'background:var(--wine);color:var(--cream);border-color:var(--wine);';
+      const pendingList = tab === 'today' ? pendingToday : tab === 'tomorrow' ? pendingTomorrow : pendingOther;
+      const emptyMsg = tab === 'today' ? 'No pending approvals for today.' : tab === 'tomorrow' ? 'No pending approvals for tomorrow.' : 'No pending approvals for other days.';
+      return `
+      <div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;">
+        <button class="btn btn-secondary" data-action="pending-tab-today" style="${tab === 'today' ? active : ''} font-size:10px;padding:6px 12px;">
+          Today <span style="margin-left:4px;opacity:0.7;">${pendingToday.length}</span>
+        </button>
+        <button class="btn btn-secondary" data-action="pending-tab-tomorrow" style="${tab === 'tomorrow' ? active : ''} font-size:10px;padding:6px 12px;">
+          Tomorrow <span style="margin-left:4px;opacity:0.7;">${pendingTomorrow.length}</span>
+        </button>
+        <button class="btn btn-secondary" data-action="pending-tab-other" style="${tab === 'other' ? active : ''} font-size:10px;padding:6px 12px;">
+          Other days <span style="margin-left:4px;opacity:0.7;">${pendingOther.length}</span>
+        </button>
+      </div>
+      ${pendingList.length === 0 ? `<p style="font-size:13px;color:var(--ink-soft);padding:8px 0;">${emptyMsg}</p>` : pendingList.map(r => adminResCard(r)).join('')}`;
+    })()}
+
+    ${(() => {
+      const tab = state.adminPendingTab;
+      if (tab === 'today') {
+        const todayAll = all.filter(r => r.date === todayKey && r.status === 'confirmed').sort((a, b) => a.time.localeCompare(b.time));
+        const nowMins = _now.getHours() * 60 + _now.getMinutes();
+        return `
+        <div class="section-label">Today's schedule</div>
+        ${todayAll.length === 0 ? `<p style="font-size:13px;color:var(--ink-soft);padding:8px 0;">No confirmed bookings for today.</p>` :
+          todayAll.map(r => {
+            const pkg = packages.find(p => p.id === r.pkg_id);
+            const duration = pkg?.duration_minutes || 60;
+            const [h, m] = r.time.split(':').map(Number);
+            const finished = (h * 60 + m + duration) <= nowMins;
+            return `
+            <div class="card" style="padding:12px 14px;${finished ? 'opacity:0.45;' : ''}">
+              <div style="display:flex;align-items:center;gap:12px;min-width:0;">
+                <div style="font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:500;color:${finished ? 'var(--ink-soft)' : 'var(--wine)'};white-space:nowrap;">${r.time}</div>
+                <div style="min-width:0;">
+                  <div class="booking-name" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;${finished ? 'text-decoration:line-through;color:var(--ink-soft);' : ''}">${r.name}</div>
+                  <div class="booking-meta">${r.pkg} · ${r.guests} guest${r.guests !== 1 ? 's' : ''}${r.notes ? ' · <em>' + r.notes + '</em>' : ''}</div>
+                </div>
+              </div>
+            </div>`;
+          }).join('')}`;
+      } else if (tab === 'tomorrow') {
+        const tomorrowAll = all.filter(r => r.date === tomorrowKey && r.status === 'confirmed').sort((a, b) => a.time.localeCompare(b.time));
+        return `
+        <div class="section-label">Tomorrow's schedule</div>
+        ${tomorrowAll.length === 0 ? `<p style="font-size:13px;color:var(--ink-soft);padding:8px 0;">No confirmed bookings for tomorrow.</p>` :
+          tomorrowAll.map(r => `
+          <div class="card" style="padding:12px 14px;">
+            <div style="display:flex;align-items:center;gap:12px;min-width:0;">
+              <div style="font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:500;color:var(--wine);white-space:nowrap;">${r.time}</div>
+              <div style="min-width:0;">
+                <div class="booking-name" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${r.name}</div>
+                <div class="booking-meta">${r.pkg} · ${r.guests} guest${r.guests !== 1 ? 's' : ''}${r.notes ? ' · <em>' + r.notes + '</em>' : ''}</div>
+              </div>
+            </div>
+          </div>`).join('')}`;
+      }
+      return '';
+    })()}
+
+    <button class="btn btn-secondary" data-action="admin-logout" style="margin-top:20px;width:100%;justify-content:center;font-size:10px;">Sign out</button>
+  </div>`;
+}
+
+function adminResCard(r) {
+  const replies = r.replies || [];
+  const hasReplies = replies.length > 0;
+
+  const repliesHtml = hasReplies ? `
+    <div style="margin-top:10px;border-top:1px solid var(--cream-deeper);padding-top:10px;">
+      ${replies.map(rep => `
+        <div style="background:var(--cream-dark);border-radius:var(--radius);padding:8px 10px;margin-bottom:6px;">
+          <div style="font-size:11px;color:var(--ink-soft);margin-bottom:4px;">
+            Replied by <strong>${rep.sentBy}</strong> · ${rep.sentAt ? new Date(rep.sentAt).toLocaleString('en-GB', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' }) : ''}
+          </div>
+          <div style="font-size:12px;color:var(--ink);line-height:1.5;">${rep.message}</div>
+        </div>
+      `).join('')}
+    </div>` : '';
+
+  return `
+  <div class="card" id="res-card-${r.id}">
+    <div class="booking-row">
+      <div>
+        <div class="booking-name">${r.name}</div>
+        <div class="booking-meta">${fmtDate(r.date)} · ${r.time} · ${r.pkg} · ${r.guests}p</div>
+        ${r.notes ? `<div class="booking-meta" style="font-style:italic;margin-top:2px;">"${r.notes}"</div>` : ''}
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
+        ${statusBadge(r.status)}
+        ${hasReplies ? `<span class="badge" style="background:#eef0fb;color:#3a3a8c;border:1px solid #c0c4e8;">⌁ Replied</span>` : ''}
+      </div>
+    </div>
+    ${repliesHtml}
+    <div class="action-row">
+      ${r.status === 'pending' ? `
+      <button class="btn btn-approve" data-action="approve" data-id="${r.id}">✓ Approve</button>
+      <button class="btn btn-decline" data-action="decline" data-id="${r.id}">✗ Decline</button>` : ''}
+      <button class="btn btn-reply" data-action="reply" data-id="${r.id}">⌁ Reply</button>
+    </div>
+  </div>`;
+}
+
+// ─── Admin Calendar ───────────────────────────────────────────────
+function renderAdminCalendar() {
+  const m = state.adminCalMonth;
+  const year = m.getFullYear();
+  const month = m.getMonth();
+  const firstDay = new Date(year, month, 1).getDay();
+  const offset = (firstDay + 6) % 7;
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+  const _now = new Date();
+  const _todayKey = dateKey(_now.getFullYear(), _now.getMonth(), _now.getDate());
+
+  let cells = '';
+  for (let i = 0; i < offset; i++) cells += `<div class="cal-day-cell empty"></div>`;
+  for (let d = 1; d <= daysInMonth; d++) {
+    const key = dateKey(year, month, d);
+    const bookings = getBookingsForDate(key);
+    const isSel = state.adminSelectedDay === key;
+    const MAX = 3;
+    let cls = 'cal-day-cell';
+    if (bookings.length >= MAX) cls += ' full';
+    else if (bookings.length > 0) cls += ' partial';
+    if (isSel) cls += ' selected';
+    if (key === _todayKey) cls += ' today';
+    cells += `<div class="${cls}" data-admin-date="${key}">${d}</div>`;
+  }
+
+  const selBookings = state.adminSelectedDay ? getBookingsForDate(state.adminSelectedDay) : [];
+
+  return `
+  ${adminHeader('admin-calendar')}
+  <div class="content">
+    <div class="section-label" style="margin-top:20px;">Monthly overview</div>
+    <div class="card">
+      <div class="cal-header">
+        <button class="cal-nav" data-action="admin-cal-prev">‹</button>
+        <div class="cal-month">${monthName(m)}</div>
+        <button class="cal-nav" data-action="admin-cal-next">›</button>
+      </div>
+      <div class="cal-grid">
+        ${['Mo','Tu','We','Th','Fr','Sa','Su'].map(d => `<div class="cal-dh">${d}</div>`).join('')}
+        ${cells}
+      </div>
+      <div style="display:flex;gap:12px;margin-top:12px;flex-wrap:wrap;">
+        <div style="display:flex;align-items:center;gap:5px;font-size:10px;color:var(--ink-soft);">
+          <span style="width:10px;height:10px;border-radius:2px;background:#f8e8e8;border:1px solid #d4aaaa;display:inline-block;"></span> Full
+        </div>
+        <div style="display:flex;align-items:center;gap:5px;font-size:10px;color:var(--ink-soft);">
+          <span style="width:10px;height:10px;border-radius:2px;background:#fdf3e3;border:1px solid #e8c97a;display:inline-block;"></span> Partial
+        </div>
+        <div style="display:flex;align-items:center;gap:5px;font-size:10px;color:var(--ink-soft);">
+          <span style="width:10px;height:10px;border-radius:2px;background:var(--cream-dark);border:1px solid var(--cream-deeper);display:inline-block;"></span> Open
+        </div>
+      </div>
+    </div>
+
+    ${state.adminSelectedDay ? `
+    <div class="section-label">${fmtDate(state.adminSelectedDay)} — ${selBookings.length} booking${selBookings.length !== 1 ? 's' : ''}</div>
+    ${selBookings.length === 0 ? `<p style="font-size:13px;color:var(--ink-soft);padding:8px 0;">No bookings on this day.</p>` :
+      selBookings.map(r => adminResCard(r)).join('')}
+    ` : `<div style="padding:20px 0;font-size:13px;color:var(--ink-soft);">Tap a day to see bookings.</div>`}
+  </div>`;
+}
+
+// ─── Admin All ────────────────────────────────────────────────────
+function renderAdminAll() {
+  const filter = state.adminFilter || 'all';
+  const all = state.adminReservations;
+  const filtered = filter === 'all' ? all : all.filter(r => r.status === filter);
+
+  return `
+  ${adminHeader('admin-all')}
+  <div class="content">
+    <div style="display:flex;gap:6px;margin-top:16px;flex-wrap:wrap;">
+      ${['all','pending','confirmed','declined'].map(f => `
+      <button class="btn btn-secondary ${filter === f ? 'active' : ''}" data-filter="${f}"
+        style="${filter === f ? 'background:var(--wine);color:var(--cream);border-color:var(--wine);' : ''} font-size:10px;padding:6px 12px;">
+        ${f.charAt(0).toUpperCase() + f.slice(1)}
+        <span style="margin-left:4px;opacity:0.7;">${f === 'all' ? all.length : all.filter(r => r.status === f).length}</span>
+      </button>`).join('')}
+    </div>
+    <div style="margin-top:12px;">
+      ${filtered.map(r => adminResCard(r)).join('')}
+    </div>
+  </div>`;
+}
+
+// ─── Events ──────────────────────────────────────────────────────
+function attachEvents() {
+  document.querySelectorAll('[data-nav]').forEach(el => {
+    el.addEventListener('click', () => {
+      const target = el.dataset.nav;
+      if (target.startsWith('admin') && !state.adminLoggedIn) {
+        state.view = 'admin-login';
+      } else {
+        state.view = target;
+      }
+      render();
+    });
+  });
+
+  document.querySelectorAll('.cal-day-cell[data-date]').forEach(el => {
+    el.addEventListener('click', () => {
+      if (el.classList.contains('disabled') || el.classList.contains('empty')) return;
+      state.booking.date = el.dataset.date;
+      state.booking.time = null;
+      render();
+    });
+  });
+
+  document.querySelectorAll('[data-time]').forEach(el => {
+    el.addEventListener('click', () => {
+      if (el.classList.contains('booked')) return;
+      state.booking.time = el.dataset.time;
+      render();
+    });
+  });
+
+  document.querySelectorAll('[data-pkg]').forEach(el => {
+    el.addEventListener('click', () => {
+      state.booking.package = el.dataset.pkg;
+      render();
+    });
+  });
+
+  document.querySelectorAll('.cal-day-cell[data-admin-date]').forEach(el => {
+    el.addEventListener('click', () => {
+      state.adminSelectedDay = el.dataset.adminDate;
+      render();
+    });
+  });
+
+  document.querySelectorAll('[data-filter]').forEach(el => {
+    el.addEventListener('click', () => {
+      state.adminFilter = el.dataset.filter;
+      render();
+    });
+  });
+
+  const actions = {
+    'go-book': () => { state.view = 'book-date'; render(); },
+    'go-home': () => { state.view = 'home'; render(); },
+    'go-my-bookings': () => { state.view = 'my-bookings'; render(); },
+    'admin-entry': () => { state.view = 'admin-login'; render(); },
+    'cal-prev': async () => {
+      const now = new Date();
+      if (state.calMonth.getFullYear() === now.getFullYear() && state.calMonth.getMonth() === now.getMonth()) return;
+      state.calMonth = new Date(state.calMonth.getFullYear(), state.calMonth.getMonth() - 1, 1);
+      render();
+      await fetchSlotsForMonth(state.calMonth.getFullYear(), state.calMonth.getMonth());
+    },
+    'cal-next': async () => {
+      state.calMonth = new Date(state.calMonth.getFullYear(), state.calMonth.getMonth() + 1, 1);
+      render();
+      await fetchSlotsForMonth(state.calMonth.getFullYear(), state.calMonth.getMonth());
+    },
+    'admin-cal-prev': () => { state.adminCalMonth = new Date(state.adminCalMonth.getFullYear(), state.adminCalMonth.getMonth() - 1, 1); render(); },
+    'admin-cal-next': () => { state.adminCalMonth = new Date(state.adminCalMonth.getFullYear(), state.adminCalMonth.getMonth() + 1, 1); render(); },
+    'next-step': () => {
+      if (!state.booking.date || !state.booking.time) { showToast('Please select a date and time'); return; }
+      state.view = 'book-details'; render();
+    },
+    'back-step': () => { state.view = 'book-date'; render(); },
+    'guests-minus': () => {
+      if (state.booking.guests > 1) { state.booking.guests--; document.getElementById('guests-val').textContent = state.booking.guests; }
+    },
+    'guests-plus': () => {
+      if (state.booking.guests < 10) { state.booking.guests++; document.getElementById('guests-val').textContent = state.booking.guests; }
+    },
+    'submit-booking': async () => {
+      const name = document.getElementById('f-name')?.value.trim();
+      const email = document.getElementById('f-email')?.value.trim();
+      if (!state.booking.package) { showToast('Please choose a package'); return; }
+      if (!name) { showToast('Please enter your name'); return; }
+      if (!email) { showToast('Please enter your email'); return; }
+      state.booking.name = name;
+      state.booking.email = email;
+      state.booking.phone = document.getElementById('f-phone')?.value.trim() || '';
+      state.booking.notes = document.getElementById('f-notes')?.value.trim() || '';
+      try {
+        const res = await fetch('/api/reservations', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: state.booking.name,
+            email: state.booking.email,
+            phone: state.booking.phone,
+            date: state.booking.date,
+            time: state.booking.time,
+            pkg: state.booking.package,
+            guests: state.booking.guests,
+            notes: state.booking.notes,
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok) { showToast(data.error || 'Booking failed'); return; }
+        state.view = 'confirm'; render();
+      } catch (e) {
+        showToast('Network error. Please try again.');
+      }
+    },
+    'send-otp': async () => {
+      const email = document.getElementById('otp-email')?.value.trim();
+      if (!email) { showToast('Please enter your email'); return; }
+      const { error } = await sb.auth.signInWithOtp({ email, options: { shouldCreateUser: true } });
+      if (error) { showToast(error.message); return; }
+      state.guestOtpEmail = email;
+      state.guestOtpSent = true;
+      render();
+    },
+    'resend-otp': () => {
+      state.guestOtpSent = false;
+      state.guestOtpEmail = '';
+      render();
+    },
+    'guest-signout': async () => {
+      await sb.auth.signOut();
+      state.guestSession = null;
+      state.myBookings = [];
+      state.guestOtpSent = false;
+      state.guestOtpEmail = '';
+      render();
+    },
+    'do-login': async () => {
+      const username = document.getElementById('admin-user')?.value.trim();
+      const password = document.getElementById('admin-pass')?.value.trim();
+      if (!username || !password) { showToast('Enter username and password'); return; }
+      try {
+        const res = await fetch('/api/admin/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ username, password }),
+        });
+        const data = await res.json();
+        if (!res.ok) { showToast(data.error || 'Login failed'); return; }
+        state.adminLoggedIn = true;
+        state.view = 'admin-overview';
+        render();
+        await fetchAdminReservations();
+      } catch (e) {
+        showToast('Network error. Please try again.');
+      }
+    },
+    'pending-tab-today':     () => { state.adminPendingTab = 'today';    render(); },
+    'pending-tab-tomorrow':  () => { state.adminPendingTab = 'tomorrow'; render(); },
+    'pending-tab-other':     () => { state.adminPendingTab = 'other';    render(); },
+    'admin-logout': async () => {
+      await fetch('/api/admin/logout', { method: 'POST', credentials: 'include' });
+      state.adminLoggedIn = false;
+      state.adminReservations = [];
+      state.view = 'home';
+      render();
+    },
+  };
+
+  document.querySelectorAll('[data-action]').forEach(el => {
+    el.addEventListener('click', async (e) => {
+      e.preventDefault();
+      const a = el.dataset.action;
+      if (actions[a]) { await actions[a](e); return; }
+
+      if (a === 'approve') {
+        const id = el.dataset.id;
+        const r = state.adminReservations.find(x => String(x.id) === String(id));
+        if (!r) return;
+        const res = await fetch(`/api/admin/reservations/${id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ status: 'confirmed' }),
+        });
+        if (res.ok) { showToast(`✓ Confirmed: ${r.name}`); await fetchAdminReservations(); }
+        else showToast('Failed to update');
+      }
+
+      if (a === 'decline') {
+        const id = el.dataset.id;
+        const r = state.adminReservations.find(x => String(x.id) === String(id));
+        if (!r) return;
+        const res = await fetch(`/api/admin/reservations/${id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ status: 'declined' }),
+        });
+        if (res.ok) { showToast(`Declined: ${r.name}`); await fetchAdminReservations(); }
+        else showToast('Failed to update');
+      }
+
+      if (a === 'reply') {
+        const id = el.dataset.id;
+        const r = state.adminReservations.find(x => String(x.id) === String(id));
+        if (!r) return;
+        openModal(`
+          <div class="modal-title">${r.name}</div>
+          <div class="modal-sub">${fmtDate(r.date)} · ${r.time} · ${r.pkg} · ${r.guests} guests</div>
+          <div class="form-group" style="margin-bottom:12px;">
+            <label>Message to guest</label>
+            <textarea id="reply-msg" placeholder="Dear ${r.name.split(' ')[0]}, thank you for your reservation request..." style="min-height:100px;"></textarea>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-approve" onclick="(async()=>{
+              const msg=document.getElementById('reply-msg').value;
+              if(!msg.trim()){return;}
+              const res=await fetch('/api/admin/reservations/${id}/reply',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',body:JSON.stringify({message:msg})});
+              closeModal();
+              showToast(res.ok?'Reply sent':'Failed to send reply');
+              if(res.ok) fetchAdminReservations();
+            })()">Send reply</button>
+            <button class="btn btn-reply" onclick="closeModal()">Cancel</button>
+          </div>
+          <div style="height:1px;background:var(--cream-deeper);margin:14px 0;"></div>
+          <div style="font-size:10px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:8px;">Quick actions</div>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-approve" onclick="(async()=>{
+              await fetch('/api/admin/reservations/${id}',{method:'PATCH',headers:{'Content-Type':'application/json'},credentials:'include',body:JSON.stringify({status:'confirmed'})});
+              closeModal(); showToast('✓ Confirmed'); fetchAdminReservations();
+            })()">✓ Approve</button>
+            <button class="btn btn-decline" onclick="(async()=>{
+              await fetch('/api/admin/reservations/${id}',{method:'PATCH',headers:{'Content-Type':'application/json'},credentials:'include',body:JSON.stringify({status:'declined'})});
+              closeModal(); showToast('Declined'); fetchAdminReservations();
+            })()">✗ Decline</button>
+          </div>
+        `);
+      }
+    });
+  });
+
+  document.getElementById('overlay').addEventListener('click', e => {
+    if (e.target === document.getElementById('overlay')) closeModal();
+  });
+}
+
+// ─── Init ─────────────────────────────────────────────────────────
+async function init() {
+  // Restore guest session if one exists
+  const { data: { session } } = await sb.auth.getSession();
+  if (session) {
+    state.guestSession = session;
+    await fetchMyBookings();
+  }
+
+  // Keep session in sync — handles magic link redirect
+  sb.auth.onAuthStateChange(async (event, session) => {
+    state.guestSession = session;
+    if (event === 'SIGNED_IN') {
+      state.guestOtpSent = false;
+      state.view = 'my-bookings';
+      await fetchMyBookings();
+    } else if (event === 'SIGNED_OUT') {
+      state.myBookings = [];
+      render();
+    }
+  });
+
+  // Check admin session
+  try {
+    const res = await fetch('/api/admin/me', { credentials: 'include' });
+    const data = await res.json();
+    if (data.loggedIn) {
+      state.adminLoggedIn = true;
+      fetchAdminReservations();
+    }
+  } catch (_) {}
+
+  // Load packages from Supabase
+  const { data: pkgData } = await sb.from('packages').select('*').order('sort_order');
+  packages = pkgData || [];
+
+  // Load slots for current calendar month
+  await fetchSlotsForMonth(state.calMonth.getFullYear(), state.calMonth.getMonth());
+}
+
+init();
+</script>
+</body>
+</html>
