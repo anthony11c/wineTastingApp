@@ -3,6 +3,7 @@ const session = require('express-session');
 const bcrypt = require('bcryptjs');
 const cors = require('cors');
 const path = require('path');
+const nodemailer = require('nodemailer');
 const { createClient } = require('@supabase/supabase-js');
 require('dotenv').config();
 
@@ -21,6 +22,135 @@ if (!SUPABASE_SERVICE_KEY) {
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, {
   auth: { persistSession: false },
 });
+
+// ─── Mailer ────────────────────────────────────────────────────────────────────
+const transporter = nodemailer.createTransport({
+  host: process.env.SMTP_HOST,
+  port: parseInt(process.env.SMTP_PORT || '587', 10),
+  secure: process.env.SMTP_PORT === '465',
+  auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
+});
+
+function formatDate(dateStr) {
+  const [y, m, d] = dateStr.split('-');
+  return `${d}/${m}/${y}`;
+}
+
+async function sendReplyEmail(reservation, message) {
+  if (!process.env.SMTP_HOST || !process.env.SMTP_USER) return;
+  const { data: linkData } = await supabase.auth.admin.generateLink({
+    type: 'magiclink',
+    email: reservation.email,
+    options: { redirectTo: process.env.APP_URL || 'http://localhost:3000' },
+  });
+  const loginLink = linkData?.properties?.action_link || (process.env.APP_URL || 'http://localhost:3000');
+  await transporter.sendMail({
+    from: process.env.SMTP_FROM || process.env.SMTP_USER,
+    to: reservation.email,
+    subject: `Message regarding your reservation — ${formatDate(reservation.date)} at ${reservation.time}`,
+    html: `
+      <div style="font-family:Georgia,serif;max-width:520px;margin:0 auto;color:#2c1a0e;">
+        <p>Dear ${reservation.name},</p>
+        <p>You have received a message regarding your reservation on <strong>${formatDate(reservation.date)}</strong> at <strong>${reservation.time}</strong>:</p>
+        <blockquote style="border-left:3px solid #8b1a1a;margin:16px 0;padding:8px 16px;color:#444;">${message}</blockquote>
+        <p>
+          <a href="${loginLink}" style="display:inline-block;background:#8b1a1a;color:#fff;padding:10px 20px;text-decoration:none;border-radius:4px;">
+            View your reservation
+          </a>
+        </p>
+        <p style="font-size:12px;color:#888;">This link will log you in and take you to your bookings.</p>
+      </div>
+    `,
+  });
+}
+
+async function sendGuestReplyNotification(reservation, message) {
+  if (!process.env.SMTP_HOST || !process.env.SMTP_USER) return;
+  const appUrl = process.env.APP_URL || 'http://localhost:3000';
+  await transporter.sendMail({
+    from: process.env.SMTP_FROM || process.env.SMTP_USER,
+    to: process.env.SMTP_FROM || process.env.SMTP_USER,
+    subject: `Guest reply — ${reservation.name} · ${formatDate(reservation.date)} at ${reservation.time}`,
+    html: `
+      <div style="font-family:Georgia,serif;max-width:520px;margin:0 auto;color:#2c1a0e;">
+        <p><strong>${reservation.name}</strong> (${reservation.email}) replied to their reservation on <strong>${formatDate(reservation.date)}</strong> at <strong>${reservation.time}</strong>:</p>
+        <blockquote style="border-left:3px solid #8b1a1a;margin:16px 0;padding:8px 16px;color:#444;">${message}</blockquote>
+        <p><a href="${appUrl}" style="display:inline-block;background:#8b1a1a;color:#fff;padding:10px 20px;text-decoration:none;border-radius:4px;">Open admin panel</a></p>
+      </div>
+    `,
+  });
+}
+
+async function sendNewReservationNotification(reservation) {
+  if (!process.env.SMTP_HOST || !process.env.SMTP_USER) return;
+  const appUrl = process.env.APP_URL || 'http://localhost:3000';
+  await transporter.sendMail({
+    from: process.env.SMTP_FROM || process.env.SMTP_USER,
+    to: process.env.SMTP_FROM || process.env.SMTP_USER,
+    subject: `New reservation — ${reservation.name} · ${formatDate(reservation.date)} at ${reservation.time}`,
+    html: `
+      <div style="font-family:Georgia,serif;max-width:520px;margin:0 auto;color:#2c1a0e;">
+        <p>A new reservation request has been submitted.</p>
+        <table style="border-collapse:collapse;margin:16px 0;">
+          <tr><td style="padding:4px 12px 4px 0;color:#888;font-size:12px;">Name</td><td style="font-size:13px;">${reservation.name}</td></tr>
+          <tr><td style="padding:4px 12px 4px 0;color:#888;font-size:12px;">Email</td><td style="font-size:13px;">${reservation.email}</td></tr>
+          <tr><td style="padding:4px 12px 4px 0;color:#888;font-size:12px;">Phone</td><td style="font-size:13px;">${reservation.phone || '—'}</td></tr>
+          <tr><td style="padding:4px 12px 4px 0;color:#888;font-size:12px;">Date</td><td style="font-size:13px;">${formatDate(reservation.date)}</td></tr>
+          <tr><td style="padding:4px 12px 4px 0;color:#888;font-size:12px;">Time</td><td style="font-size:13px;">${reservation.time}</td></tr>
+          <tr><td style="padding:4px 12px 4px 0;color:#888;font-size:12px;">Package</td><td style="font-size:13px;">${reservation.pkg}</td></tr>
+          <tr><td style="padding:4px 12px 4px 0;color:#888;font-size:12px;">Guests</td><td style="font-size:13px;">${reservation.guests}</td></tr>
+          ${reservation.notes ? `<tr><td style="padding:4px 12px 4px 0;color:#888;font-size:12px;">Notes</td><td style="font-size:13px;">${reservation.notes}</td></tr>` : ''}
+        </table>
+        <p><a href="${appUrl}" style="display:inline-block;background:#8b1a1a;color:#fff;padding:10px 20px;text-decoration:none;border-radius:4px;">Open admin panel</a></p>
+      </div>
+    `,
+  });
+}
+
+async function sendStatusEmail(reservation, status) {
+  if (!process.env.SMTP_HOST || !process.env.SMTP_USER) return;
+  const { data: linkData } = await supabase.auth.admin.generateLink({
+    type: 'magiclink',
+    email: reservation.email,
+    options: { redirectTo: process.env.APP_URL || 'http://localhost:3000' },
+  });
+  const loginLink = linkData?.properties?.action_link || (process.env.APP_URL || 'http://localhost:3000');
+  const isConfirmed = status === 'confirmed';
+  const subject = isConfirmed
+    ? `Reservation confirmed — ${formatDate(reservation.date)} at ${reservation.time}`
+    : `Reservation update — ${formatDate(reservation.date)} at ${reservation.time}`;
+  const bodyHtml = isConfirmed ? `
+    <p>Dear ${reservation.name},</p>
+    <p>We are pleased to confirm your wine tasting reservation:</p>
+    <table style="border-collapse:collapse;margin:16px 0;">
+      <tr><td style="padding:4px 12px 4px 0;color:#888;font-size:12px;">Date</td><td style="font-size:13px;">${formatDate(reservation.date)}</td></tr>
+      <tr><td style="padding:4px 12px 4px 0;color:#888;font-size:12px;">Time</td><td style="font-size:13px;">${reservation.time}</td></tr>
+      <tr><td style="padding:4px 12px 4px 0;color:#888;font-size:12px;">Package</td><td style="font-size:13px;">${reservation.pkg}</td></tr>
+      <tr><td style="padding:4px 12px 4px 0;color:#888;font-size:12px;">Guests</td><td style="font-size:13px;">${reservation.guests}</td></tr>
+    </table>
+    <p>We look forward to welcoming you to Cossetto Winery. See you soon!</p>
+  ` : `
+    <p>Dear ${reservation.name},</p>
+    <p>Unfortunately we are unable to accommodate your reservation on <strong>${formatDate(reservation.date)}</strong> at <strong>${reservation.time}</strong>.</p>
+    <p>We apologise for the inconvenience. Please feel free to book another date — we would love to welcome you.</p>
+  `;
+  await transporter.sendMail({
+    from: process.env.SMTP_FROM || process.env.SMTP_USER,
+    to: reservation.email,
+    subject,
+    html: `
+      <div style="font-family:Georgia,serif;max-width:520px;margin:0 auto;color:#2c1a0e;">
+        ${bodyHtml}
+        <p>
+          <a href="${loginLink}" style="display:inline-block;background:#8b1a1a;color:#fff;padding:10px 20px;text-decoration:none;border-radius:4px;">
+            View your reservation
+          </a>
+        </p>
+        <p style="font-size:12px;color:#888;">This link will log you in and take you to your bookings.</p>
+      </div>
+    `,
+  });
+}
 
 // ─── Admin credentials (bcrypt hash of "admin123") ─────────────────────────
 const ADMIN_HASH = '$2a$10$EGVzH1.70v4b/kJhiB5DKOjXxiv9gTI84LdLoqG261YKD0G/vnXHm';
@@ -72,6 +202,24 @@ app.get('/api/packages', async (req, res) => {
   if (error) return res.status(500).json({ error: error.message });
   res.json(data);
 });
+
+const SLOT_CAPACITY = 25;
+
+async function syncSlotCapacity(date, time) {
+  const [{ data: bookings }, { data: slotRow }] = await Promise.all([
+    supabase.from('reservations').select('guests').eq('date', date).eq('time', time).in('status', ['confirmed', 'pending']),
+    supabase.from('available_slots').select('slots').eq('date', date).maybeSingle(),
+  ]);
+  if (!slotRow) return;
+  const totalGuests = (bookings || []).reduce((sum, r) => sum + r.guests, 0);
+  const currentSlots = slotRow.slots || [];
+  const isAvailable = currentSlots.includes(time);
+  if (totalGuests >= SLOT_CAPACITY && isAvailable) {
+    await supabase.from('available_slots').update({ slots: currentSlots.filter(t => t !== time) }).eq('date', date);
+  } else if (totalGuests < SLOT_CAPACITY && !isAvailable) {
+    await supabase.from('available_slots').update({ slots: [...currentSlots, time].sort() }).eq('date', date);
+  }
+}
 
 // ─── Slots ────────────────────────────────────────────────────────────────────
 app.get('/api/slots', async (req, res) => {
@@ -138,6 +286,10 @@ app.post('/api/reservations', async (req, res) => {
   }
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return res.status(400).json({ error: 'Invalid date format' });
 
+  const now = new Date();
+  const slotDateTime = new Date(`${date}T${time}:00`);
+  if (slotDateTime <= now) return res.status(409).json({ error: 'This time slot has already passed' });
+
   const { data: pkgData } = await supabase.from('packages').select('*').eq('id', pkg).maybeSingle();
   if (!pkgData) return res.status(400).json({ error: `Unknown package: ${pkg}` });
 
@@ -149,9 +301,12 @@ app.post('/api/reservations', async (req, res) => {
   const { data: slotRow } = await supabase.from('available_slots').select('slots').eq('date', date).maybeSingle();
   if (!slotRow?.slots?.includes(time)) return res.status(409).json({ error: 'This time slot is not available' });
 
-  const { data: existing } = await supabase.from('reservations').select('id')
-    .eq('date', date).eq('time', time).in('status', ['confirmed', 'pending']).maybeSingle();
-  if (existing) return res.status(409).json({ error: 'This time slot is already booked' });
+  const { data: existingBookings } = await supabase.from('reservations').select('guests')
+    .eq('date', date).eq('time', time).in('status', ['confirmed', 'pending']);
+  const currentGuests = (existingBookings || []).reduce((sum, r) => sum + r.guests, 0);
+  if (currentGuests + guestCount > SLOT_CAPACITY) {
+    return res.status(409).json({ error: `This time slot only has ${SLOT_CAPACITY - currentGuests} spots remaining` });
+  }
 
   const { data: newRes, error } = await supabase.from('reservations').insert({
     name, email, phone: phone || '', date, time,
@@ -161,6 +316,8 @@ app.post('/api/reservations', async (req, res) => {
   }).select().single();
 
   if (error) return res.status(500).json({ error: error.message });
+  await syncSlotCapacity(date, time);
+  sendNewReservationNotification(newRes).catch(err => console.error('New reservation email failed:', err.message));
   res.status(201).json(newRes);
 });
 
@@ -190,6 +347,10 @@ app.patch('/api/admin/reservations/:id', requireAdmin, async (req, res) => {
     .update({ status }).eq('id', req.params.id).select().maybeSingle();
   if (error) return res.status(500).json({ error: error.message });
   if (!data) return res.status(404).json({ error: 'Reservation not found' });
+  await syncSlotCapacity(data.date, data.time);
+  if (status === 'confirmed' || status === 'declined') {
+    sendStatusEmail(data, status).catch(err => console.error('Status email failed:', err.message));
+  }
   res.json(data);
 });
 
@@ -198,16 +359,40 @@ app.post('/api/admin/reservations/:id/reply', requireAdmin, async (req, res) => 
   if (!message?.trim()) return res.status(400).json({ error: 'message is required' });
 
   const { data: existing, error: fetchErr } = await supabase.from('reservations')
-    .select('replies').eq('id', req.params.id).maybeSingle();
+    .select('*').eq('id', req.params.id).maybeSingle();
   if (fetchErr || !existing) return res.status(404).json({ error: 'Reservation not found' });
 
   const replies = [
     ...(existing.replies || []),
-    { message: message.trim(), sentAt: new Date().toISOString(), sentBy: req.session.adminUsername },
+    { message: message.trim(), sentAt: new Date().toISOString(), from: 'winery', sentBy: req.session.adminUsername },
   ];
   const { data, error } = await supabase.from('reservations')
     .update({ replies }).eq('id', req.params.id).select().single();
   if (error) return res.status(500).json({ error: error.message });
+  sendReplyEmail(existing, message.trim()).catch(err => console.error('Reply email failed:', err.message));
+  res.json({ ok: true, reservation: data });
+});
+
+app.post('/api/reservations/:id/reply', async (req, res) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader?.startsWith('Bearer ')) return res.status(401).json({ error: 'Unauthorized' });
+  const { data: { user }, error: authError } = await supabase.auth.getUser(authHeader.slice(7));
+  if (authError || !user) return res.status(401).json({ error: 'Unauthorized' });
+
+  const { message } = req.body;
+  if (!message?.trim()) return res.status(400).json({ error: 'message is required' });
+
+  const { data: existing, error: fetchErr } = await supabase.from('reservations').select('*').eq('id', req.params.id).maybeSingle();
+  if (fetchErr || !existing) return res.status(404).json({ error: 'Reservation not found' });
+  if (existing.email !== user.email) return res.status(403).json({ error: 'Forbidden' });
+
+  const replies = [
+    ...(existing.replies || []),
+    { message: message.trim(), sentAt: new Date().toISOString(), from: 'guest', sentBy: user.email },
+  ];
+  const { data, error } = await supabase.from('reservations').update({ replies }).eq('id', req.params.id).select().single();
+  if (error) return res.status(500).json({ error: error.message });
+  sendGuestReplyNotification(existing, message.trim()).catch(err => console.error('Guest reply notification failed:', err.message));
   res.json({ ok: true, reservation: data });
 });
 
