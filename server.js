@@ -317,7 +317,7 @@ app.post('/api/reservations', async (req, res) => {
 
   if (error) return res.status(500).json({ error: error.message });
   await syncSlotCapacity(date, time);
-  sendNewReservationNotification(newRes).catch(err => console.error('New reservation email failed:', err.message));
+  await sendNewReservationNotification(newRes).catch(err => console.error('New reservation email failed:', err.message));
   res.status(201).json(newRes);
 });
 
@@ -349,7 +349,7 @@ app.patch('/api/admin/reservations/:id', requireAdmin, async (req, res) => {
   if (!data) return res.status(404).json({ error: 'Reservation not found' });
   await syncSlotCapacity(data.date, data.time);
   if (status === 'confirmed' || status === 'declined') {
-    sendStatusEmail(data, status).catch(err => console.error('Status email failed:', err.message));
+    await sendStatusEmail(data, status).catch(err => console.error('Status email failed:', err.message));
   }
   res.json(data);
 });
@@ -369,7 +369,7 @@ app.post('/api/admin/reservations/:id/reply', requireAdmin, async (req, res) => 
   const { data, error } = await supabase.from('reservations')
     .update({ replies }).eq('id', req.params.id).select().single();
   if (error) return res.status(500).json({ error: error.message });
-  sendReplyEmail(existing, message.trim()).catch(err => console.error('Reply email failed:', err.message));
+  await sendReplyEmail(existing, message.trim()).catch(err => console.error('Reply email failed:', err.message));
   res.json({ ok: true, reservation: data });
 });
 
