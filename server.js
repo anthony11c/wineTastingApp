@@ -392,7 +392,7 @@ app.post('/api/reservations/:id/reply', async (req, res) => {
   ];
   const { data, error } = await supabase.from('reservations').update({ replies }).eq('id', req.params.id).select().single();
   if (error) return res.status(500).json({ error: error.message });
-  sendGuestReplyNotification(existing, message.trim()).catch(err => console.error('Guest reply notification failed:', err.message));
+  await sendGuestReplyNotification(existing, message.trim()).catch(err => console.error('Guest reply notification failed:', err.message));
   res.json({ ok: true, reservation: data });
 });
 
