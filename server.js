@@ -152,8 +152,8 @@ async function sendStatusEmail(reservation, status) {
   });
 }
 
-// ─── Admin credentials (bcrypt hash of "admin123") ─────────────────────────
-const ADMIN_HASH = '$2a$10$EGVzH1.70v4b/kJhiB5DKOjXxiv9gTI84LdLoqG261YKD0G/vnXHm';
+// ─── Admin credentials ──────────────────────────────────────────────────────
+const ADMIN_HASH = '$2a$10$zXuEINe5i5AlUm0hjrvaQObjqOqpINHUtvPpUKe1e1ggzuz6cVNN2';
 
 // ─── Middleware ────────────────────────────────────────────────────────────────
 app.use(cors({ origin: true, credentials: true }));
@@ -179,7 +179,7 @@ function requireAdmin(req, res, next) {
 app.post('/api/admin/login', async (req, res) => {
   const { username, password } = req.body;
   if (!username || !password) return res.status(400).json({ error: 'Username and password required' });
-  if (username !== 'admin') return res.status(401).json({ error: 'Invalid credentials' });
+  if (username !== 'cossettoAdmin') return res.status(401).json({ error: 'Invalid credentials' });
   const valid = await bcrypt.compare(password, ADMIN_HASH);
   if (!valid) return res.status(401).json({ error: 'Invalid credentials' });
   req.session.adminLoggedIn = true;
@@ -411,5 +411,5 @@ app.get('/api/admin/stats', requireAdmin, async (req, res) => {
 // ─── Start ─────────────────────────────────────────────────────────────────────
 app.listen(PORT, () => {
   console.log(`Cossetto winery backend running on http://localhost:${PORT}`);
-  console.log('Admin credentials: username=admin  password=admin123');
+  console.log('Admin credentials: username=cossettoAdmin');
 });
