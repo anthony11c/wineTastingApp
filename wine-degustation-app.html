@@ -1315,6 +1315,10 @@ function attachEvents() {
 
   document.querySelectorAll('[data-pkg]').forEach(el => {
     el.addEventListener('click', () => {
+      state.booking.name = document.getElementById('f-name')?.value || state.booking.name;
+      state.booking.email = document.getElementById('f-email')?.value || state.booking.email;
+      state.booking.phone = document.getElementById('f-phone')?.value || state.booking.phone;
+      state.booking.notes = document.getElementById('f-notes')?.value || state.booking.notes;
       state.booking.package = el.dataset.pkg;
       render();
     });
