@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "builds": [
+    { "src": "server.js", "use": "@vercel/node" },
+    { "src": "favicon-cossetto-32x32.png", "use": "@vercel/static" }
+  ],
+  "routes": [
+    { "src": "/favicon-cossetto-32x32.png", "dest": "/favicon-cossetto-32x32.png" },
+    { "src": "/(.*)", "dest": "/server.js" }
+  ]
+}
